@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Build files
+dist/
+build/
+
+# Logs
+*.log
+
+# Prettier cache
+.prettiercache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
