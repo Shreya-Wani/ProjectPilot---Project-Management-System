@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-const noteSchema = new Schema({});
+const projectNoteSchema = new Schema({});
 
-export const Note = mongoose.model('Note', noteSchema);
+export const Note = mongoose.model('Note', projectNoteSchema);
