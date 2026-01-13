@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "��#\u0000 \u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000P\u0000i\u0000l\u0000o\u0000t\u0000 \u0000\u0013  \u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000 \u0000M\u0000a\u0000n\u0000a\u0000g\u0000e\u0000m\u0000e\u0000n\u0000t\u0000 \u0000S\u0000y\u0000s\u0000t\u0000e\u0000m\u0000\r\u0000 \u0000",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,10 +19,12 @@
   },
   "homepage": "https://github.com/Shreya-Wani/ProjectPilot---Project-Management-System#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.2"
   }
 }
