@@ -74,7 +74,42 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
     
-    //validation
+     //1. find user by email
+    const user = await User.findOne({
+        email
+    });
+
+    if(!user){
+        throw new ApiError(400, 'User not found');
+    }
+
+    //2. check if password is correct
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+    if(!isPasswordCorrect){
+        throw new ApiError(400, 'Invalid password');
+    }
+
+    //3. check if email is verified
+    if(!user.isEmailverified){
+        throw new ApiError(400, 'Email is not verified');
+    }
+
+    //4. generate tokens
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    //5. save refresh token in database
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    //6. send response
+    res.status(200).json(
+        new ApiResponse(200, "Login successful", {
+            accessToken,
+            refreshToken
+        })
+    );
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
