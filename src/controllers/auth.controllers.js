@@ -23,7 +23,7 @@ const registerUser = asyncHandler(async (req, res) => {
         }});
 
         //2. create new user
-        const newUser = await User.create({
+        const user = await User.create({
             email,
             username,
             password,
@@ -33,7 +33,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(201).json({
             status: 'success',
             data: {
-                user: newUser
+                user: user
             }
         });
 
@@ -42,23 +42,23 @@ const registerUser = asyncHandler(async (req, res) => {
             unHashedToken,
             hashedToken,
             tokenExpiry 
-        } = newUser.generateTemporaryToken();
+        } = user.generateTemporaryToken();
 
         //4. save hashed token & expiry in database
-        newUser.emailVerificationToken = hashedToken;
-        newUser.emailVerificationTokenExpiry = tokenExpiry;
+        user.emailVerificationToken = hashedToken;
+        user.emailVerificationTokenExpiry = tokenExpiry;
 
-        await newUser.save({ validateBeforeSave: false });
+        await user.save({ validateBeforeSave: false });
 
         //5. create email verification URL
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`;
 
         //6. send verification email
         await sendMail({
-            email: newUser.email,
+            email: user.email,
             subject: 'Verify your email address',
             mailGenContent: emailVerificationMailContent(
-                newUser.username,
+                user.username,
                 verificationUrl
             )
         })
@@ -72,7 +72,7 @@ const registerUser = asyncHandler(async (req, res) => {
         )
 
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { email, password } = req.body
     
     //validation
 });
