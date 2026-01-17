@@ -113,9 +113,19 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const userId = req.user._id;
     
-    //validation
+    //remove refresh token from database
+    await User.findByIdAndUpdate(
+        userId,
+        {
+            $unset: { refreshToken: 1 }
+        }
+    );
+
+    res.status(200).json(
+        new ApiResponse(200, "Logout successful")
+    );
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
