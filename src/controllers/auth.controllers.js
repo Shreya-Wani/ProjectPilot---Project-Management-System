@@ -336,9 +336,19 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
-    
-    //validation
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).select(
+        "-password -refreshToken -emailVerificationToken -emailVerificationExpiry -passwordResetToken -passwordResetExpiry"
+    )
+
+    if(!user){
+        throw new ApiError(404, "user not found");
+    }
+
+    res.status(200).json(
+        new ApiResponse(200, "Current user fetched successfully", user)
+    );
 });
 
 export { registerUser, loginUser, logoutUser, verifyEmail, resendVerificationEmail, refreshAccessToken, forgotPasswordRequest, changeCurrentPassword, getCurrentUser };
