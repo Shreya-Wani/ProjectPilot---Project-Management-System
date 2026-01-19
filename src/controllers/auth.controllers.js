@@ -297,9 +297,42 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const userId = req.user._id;
+    const { oldPassword, newPassword } = req.body;
+
+    //find user from database
+    const user = await user.findById(userId);
     
-    //validation
+    if(!user){
+        throw new ApiError(404, "User not found");
+    }
+
+    //check if old password is correct
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    if(!isPasswordCorrect) {
+        throw new ApiError(401, "old password is correct");
+    }
+
+    //prevent same password reuse
+    const isSamePassword = await user.isPasswordCorrect(newPassword);
+
+    if(isSamePassword) {
+        throw new ApiError(
+            400,
+            "New p assword must be different from currwnt password"
+        )
+    }
+
+    //set new password
+    user.password = newPassword;
+
+    //save user
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(200, "password changed successfully")
+    )
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
