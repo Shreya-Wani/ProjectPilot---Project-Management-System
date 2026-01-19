@@ -214,9 +214,38 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
 
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
-    
-    //validation
+    const { refreshToken } = req.body;
+
+    if(!refreshAccessToken){
+        throw new ApiError(401, "Refresh token is expired")
+    }
+
+    //verify refresh token signature
+    const decode = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+    )
+
+    //Find user from decode token
+    const user = await User.findById(decode._id);
+
+    if(!user){
+        throw new ApiError(401, "Invalid refresh token");
+    }
+
+    //match refreshtoken with db
+    if(user.refreshToken !== refreshToken) {
+        throw new ApiError(401, "Refresh token expired or reused");
+    }
+
+    //generate new access token
+    const newAccessToken = user.generateAccessToken();
+
+    res.send(200).json(
+        new ApiResponse(200, "Access token refreshed successfully", {
+            accessToken: newAccessToken
+        })
+    );
 });
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
