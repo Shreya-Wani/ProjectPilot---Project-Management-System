@@ -163,10 +163,55 @@ const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 const resendVerificationEmail = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { email } = req.body;
+
+    //find user by email
+    const user = await user.findOne({
+        email
+    });
+
+    if(!user){
+        throw new ApiError(404, "User not found");
+    }
     
-    //validation
+    //if already verified, no need to resend
+    if(user.isEmailverified){
+        throw new ApiError(400, "Email is already verified");
+    }
+
+    //Generate new verification url
+    const {
+        unHashedToken,
+        hashedToken,
+        tokenExpiry
+    } = user.generateTemporaryToken();
+
+    //save new token & expiry in DB
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationToken = tokenExpiry;
+
+    await user.save({
+        validateBeforeSave: false
+    });
+
+    //create verification URL
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${unHashedToken}`;
+
+    //send verification email again
+    await sendMail({
+        email: user.email,
+        subject: "verify your email address",
+        mailGenContent: emailVerificationMailContent(
+            user.username,
+            verificationUrl
+        )
+    })
+
+    res.status(200).json(
+        new ApiResponse(200, "verification email resent successfully")
+    );
 });
+
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
     const { email, username, password, role } = req.body
