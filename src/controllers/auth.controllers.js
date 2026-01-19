@@ -249,9 +249,51 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 const forgotPasswordRequest = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { email } = req.body
     
-    //validation
+    //find user by email
+    const user = await user.findOne(
+        {
+            email
+        }
+    );
+
+    if(!user){
+        throw new ApiError(404, "User Not Found");
+    }
+
+    //generate password reset token
+    const {
+        unHashedToken,
+        hashedToken,
+        tokenExpiry
+    } = user.generateTemporaryToken();
+
+    //Save hashed token & expiry in db
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpiry = tokenExpiry;
+
+    await user.save({
+        validateBeforeSave: false
+    })
+
+    //create reset password url 
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${unHashedToken}`;
+
+    //send reset password email
+    await sendMail({
+        email: sendMail({
+        subject: "Reset your Password",
+        mailGenContent: forgotPasswordMailContent(
+            user.username,
+            resetUrl
+        )
+        })
+    });
+
+    res.status(200).json(
+        new ApiResponse(200, "Password mail sent successfully")
+    );
 });
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
