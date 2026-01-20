@@ -76,3 +76,40 @@ const createNote =asyncHandler(async (req, res) => {
         new ApiResponse(201, populatedNote, "Note created successfully")
     );
 });
+
+//update note
+const updateNote = async (req, res) => {
+    const {projectId, noteId} = req.params;
+    const {title, content} = req.body;
+
+    if(
+        !mongoose.Types.ObjectId.isValid(projectId) ||
+        !mongoose.Types.ObjectId.isValid(noteId)
+    ) {
+        throw new ApiError(400, "Inavlid project or note id")
+    }
+
+    if (!title && !content) {
+        throw new ApiError(400, "At least one field (title or content) is required");
+    }
+
+    const note = await Note.findOne({
+        _id: noteId,
+        project: projectId
+    });
+    
+    if (!note) {
+        throw new ApiError(404, "Note not found in this project");
+    }
+
+    if (title) note.title = title;
+    if (content) note.content = content;
+
+    await note.save();
+
+    await note.populate("createdBy", "username fullname avatar");
+
+    return res.status(201).json(
+        new ApiResponse(201, populatedNote, "Note updated successfully")
+    );
+};
