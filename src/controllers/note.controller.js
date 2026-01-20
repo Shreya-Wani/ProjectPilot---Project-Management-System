@@ -113,3 +113,30 @@ const updateNote = async (req, res) => {
         new ApiResponse(201, populatedNote, "Note updated successfully")
     );
 };
+
+//delete note
+const deleteNote = async (req, res) => {
+    const { projectId, noteId} = req.params;
+
+    if(
+        !mongoose.Types.ObjectId.isValid(projectId) ||
+        !mongoose.Types.ObjectId.isValid(noteId)
+    ) {
+        throw new ApiError(400, "Invalid project or note id");
+    }
+
+    const note = await Note.findOneAndDelete({
+        _id: noteId,
+        project: projectId
+    });
+ 
+    if (!note) {
+        throw new ApiError(404, "Note not found in this project");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, "Note deleted successfully")
+    );
+};
+
+export { getNotes, getNoteById, createNote, updateNote, deleteNote}
