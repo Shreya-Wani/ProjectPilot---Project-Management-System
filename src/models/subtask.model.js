@@ -1,4 +1,4 @@
-import mongoose, {schema} from 'mongoose';
+import mongoose, {Schema} from 'mongoose';
 
 const subTaskSchema = new Schema({
     title: {
