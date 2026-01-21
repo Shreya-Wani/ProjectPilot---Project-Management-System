@@ -185,9 +185,31 @@ const getProjectMembers = asyncHandler(async (req, res) => {
 });
 
 const updateMemberRole = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { memberId } = req.params;
+    const { role } = req.body;
+
+    if(!memberId || !role) {
+        throw new ApiError(400, "Member ID and role are required");
+    }
+
+    const member = await ProjectMember.findByIdAndUpdate(
+        memberId,
+        { role },
+        { new: true }
+    ).populate("user", "username email");
+
+     if (!member) {
+        throw new ApiError(404, "Project member not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            member,
+            "Member role updated successfully"
+        )
+    );
     
-    //validation
 });
 
 const deleteMemberRole = asyncHandler(async (req, res) => {
