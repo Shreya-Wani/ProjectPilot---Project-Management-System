@@ -165,9 +165,23 @@ const addMemberToProject = asyncHandler(async (req, res) => {
 });
 
 const getProjectMembers = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { projectId } = req.params;
+
+    if(!projectId) {
+        throw new ApiError(400, "Project ID is required");
+    }
+
+    const members = await ProjectMember.find({
+        project: projectId
+    }).populate("user", "username email avatar")
+      .select("user role cretedAt");
+
+    return res.status(200).json(
+        new ApiResponse(
+            200, members, "Project members fetched successfully"
+        )
+    );
     
-    //validation
 });
 
 const updateMemberRole = asyncHandler(async (req, res) => {
