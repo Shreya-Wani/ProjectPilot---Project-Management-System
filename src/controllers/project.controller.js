@@ -213,7 +213,24 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 });
 
 const deleteMemberRole = asyncHandler(async (req, res) => {
-    const { email, username, password, role } = req.body
+    const { memberId } = req.params;
+
+    if (!memberId) {
+        throw new ApiError(400, "Member ID is required");
+    }
+
+    const member = await ProjectMember.findByIdAndDelete(memberId);
+
+    if (!member) {
+        throw new ApiError(404, "Project member not found");
+    }
     
-    //validation
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Member removed from project successfully"
+        )
+    );
+    
 });
