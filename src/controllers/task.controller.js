@@ -43,7 +43,7 @@ const createTask = asyncHandler(async (req, res) => {
 });
 
 //get tasks by projets
-const getTaskByProject = asyncHandler(async (req, res) => {
+const getTasksByProject = asyncHandler(async (req, res) => {
     const {projectId} = req.params;
 
     if(!projectId){
@@ -209,3 +209,5 @@ const deleteSubTask = asyncHandler(async (req, res) => {
         new ApiResponse(200, null, "Subtask deleted successfully")
     );
 });
+
+export {createTask, getTasksByProject, updateTask, deleteTask, createSubTask, getSubTasksByTask, toggleSubTaskStatus, deleteSubTask} 
