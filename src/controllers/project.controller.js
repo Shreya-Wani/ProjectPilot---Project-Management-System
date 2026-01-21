@@ -234,3 +234,5 @@ const deleteMemberRole = asyncHandler(async (req, res) => {
     );
     
 });
+
+export {getProjects, getProjectById, createProject, updateProject, deleteProject, addMemberToProject, updateMemberRole, deleteMemberRole}
