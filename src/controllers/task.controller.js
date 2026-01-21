@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-error.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { Task } from "../models/task.model.js";
+import { SubTask } from "../models/subtask.model.js";
 import { Project } from "../models/project.model.js";
 import { ProjectMember } from "../models/projectMember.model.js";
 
@@ -116,5 +117,95 @@ const deleteTask = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, {}, "Task deleted successfully")
+    );
+});
+
+//subtask
+
+//createSubTask
+const createSubTask = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+    const { title } = req.body;
+
+    if(!taskId || !title) {
+        throw new ApiError(400, "Task ID and title are required");
+    }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    const subTask = await SubTask.create({
+        title,
+        task: taskId,
+        createdBy: req.user._id
+    });
+
+    return res.status(201).json(
+        new ApiResponse(200, subTask, "subtask created successfully")
+    )
+});
+
+//get subtasks by task
+const getSubTasksByTask = asyncHandler(async (req, res) => {
+    const { taskId } = req.params;
+
+    if(!taskId) {
+        throw new ApiError(400, "Task ID is required")
+    }
+
+    const subTasks = await SubTask.find({ task: taskId })
+        .sort({ createdAt: 1 });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            subTasks,
+            "Subtasks fetched successfully"
+        )
+    );
+});
+
+//toggle sub task status
+const toggleSubTaskStatus = asyncHandler( async(req, res) => {
+    const { subTaskId } = req.params;
+
+    if (!subTaskId) {
+        throw new ApiError(400, "Subtask ID is required");
+    }
+
+    const subTask = await SubTask.findById(subTaskId);
+
+    if (!subTask) {
+        throw new ApiError(404, "Subtask not found");
+    }
+
+    subTask.isCompleted = !subTask.isCompleted;
+    await subTask.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, subTask, "Subtask status updated successfully")
+    );
+});
+
+// delete subtask
+
+const deleteSubTask = asyncHandler(async (req, res) => {
+    const { subTaskId } = req.params;
+
+    if (!subTaskId) {
+        throw new ApiError(400, "Subtask ID is required");
+    }
+
+    const subTask = await SubTask.findByIdAndDelete(subTaskId);
+
+    if (!subTask) {
+        throw new ApiError(404, "Subtask not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Subtask deleted successfully")
     );
 });
